@@ -22,46 +22,81 @@ def listInList(lst):
             break
     return result
 
+def intOrAst(thing):
+    if isinstance(thing, list):
+        # what is the 'env' even used for?
+        thing = evaluate(thing, True)
+
+    if isinstance(thing, int):
+        return thing
+    else:
+        raise LispError()
+
+def ensureInts(math):
+    def safeMath(a, b):
+        return math(intOrAst(a), intOrAst(b))
+    return safeMath
+
+@ensureInts
+def add(a, b):
+    return a + b
+
+@ensureInts
+def subtract(a, b):
+    return a - b
+
+@ensureInts
+def divide(a, b):
+    return a / b
+
+@ensureInts
+def multiply(a, b):
+    return a * b
+
+@ensureInts
+def divide(a, b):
+    return a / b
+
+@ensureInts
+def mod(a, b):
+    return a % b
+
+@ensureInts
+def gt(a, b):
+    return a > b
+
+theMaths = {
+    '+': add,
+    '-': subtract,
+    '/': divide,
+    '*': multiply,
+    'mod': mod,
+    '>': gt
+}
+
 def evaluate(ast, env):
     """Evaluate an Abstract Syntax Tree in the specified environment."""
-    try:
-        if isinstance(ast, (bool, int)):
-            result = ast
-        elif ast[0] == 'quote':
-            result = ast[1]
-        elif ast[0] == 'atom':
-            if isinstance(ast[1], list):
-                result = not listInList(ast[1])
-            else:
-                result = isinstance(ast[1], (bool, int))
-
-        elif ast[0] == 'eq':
-            if isinstance(ast[1], list):
-                result = (ast[1] == ast[2]) and not listInList(ast[1])
-            else:
-                result = (ast[1] == ast[2])
-
-        elif ast[0] == '+':
-            result = ast[1] + ast[2]
-
-        elif ast[0] == '-':
-            result = ast[1] - ast[2]
-
-        elif ast[0] == '/':
-            result = ast[1] / ast[2]
-
-        elif ast[0] == '*':
-            result = ast[1] * ast[2]
-
-        elif ast[0] == 'mod':
-            result = ast[1] % ast[2]
-
-        elif ast[0] == '>':
-            result = ast[1] > ast[2]
-
+    if isinstance(ast, (bool, int)):
+        result = ast
+    elif ast[0] == 'quote':
+        result = ast[1]
+    elif ast[0] == 'atom':
+        if isinstance(ast[1], list):
+            result = not listInList(ast[1])
         else:
-            result = ast
-    except TypeError:
-        raise LispError()
+            result = isinstance(ast[1], (bool, int))
+
+    elif ast[0] == 'eq':
+        if isinstance(ast[1], list):
+            result = (ast[1] == ast[2]) and not listInList(ast[1])
+        else:
+            result = (ast[1] == ast[2])
+
+    elif ast[0] in theMaths:
+        math = theMaths[ast[0]]
+        result = math(ast[1], ast[2])
+
+    else:
+        result = ast
 
     return result
