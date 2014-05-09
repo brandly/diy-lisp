@@ -22,46 +22,24 @@ def listInList(lst):
             break
     return result
 
-def intOrAst(thing):
-    if isinstance(thing, list):
-        # what is the 'env' even used for?
-        thing = evaluate(thing, True)
-
-    if isinstance(thing, int):
-        return thing
-    else:
-        raise LispError()
-
-def ensureInts(math):
-    def safeMath(a, b):
-        return math(intOrAst(a), intOrAst(b))
-    return safeMath
-
-@ensureInts
 def add(a, b):
     return a + b
 
-@ensureInts
 def subtract(a, b):
     return a - b
 
-@ensureInts
 def divide(a, b):
     return a / b
 
-@ensureInts
 def multiply(a, b):
     return a * b
 
-@ensureInts
 def divide(a, b):
     return a / b
 
-@ensureInts
 def mod(a, b):
     return a % b
 
-@ensureInts
 def gt(a, b):
     return a > b
 
@@ -75,6 +53,19 @@ theMaths = {
 }
 
 def evaluate(ast, env):
+
+    def evalIfList(thing):
+        if isinstance(thing, list):
+            thing = evaluate(thing, env)
+        return thing
+
+    @evalIfList
+    def ensureInt(thing):
+        if isinstance(thing, int):
+            return thing
+        else:
+            raise LispError()
+
     """Evaluate an Abstract Syntax Tree in the specified environment."""
     if isinstance(ast, (bool, int)):
         result = ast
@@ -82,7 +73,8 @@ def evaluate(ast, env):
         result = ast[1]
     elif ast[0] == 'atom':
         if isinstance(ast[1], list):
-            result = not listInList(ast[1])
+            potentialAtom = evaluate(ast[1], env)
+            result = not isinstance(potentialAtom, list)
         else:
             result = isinstance(ast[1], (bool, int))
 
@@ -91,10 +83,11 @@ def evaluate(ast, env):
             result = (ast[1] == ast[2]) and not listInList(ast[1])
         else:
             result = (ast[1] == ast[2])
+        # result = (evalIfList(ast[1]) == evalIfList(ast[2]))
 
     elif ast[0] in theMaths:
         math = theMaths[ast[0]]
-        result = math(ast[1], ast[2])
+        result = math(ensureInt(ast[1]), ensureInt(ast[2]))
 
     else:
         result = ast
