@@ -6,28 +6,73 @@ from types import LispError
 
 """
 This is the parser module, with the `parse` function which you'll implement as part 1 of
-the workshop. Its job is to convert strings into data structures that the evaluator can 
-understand. 
+the workshop. Its job is to convert strings into data structures that the evaluator can
+understand.
 """
+
+def typer(thing):
+    if thing[0] == '(':
+        result = parse_level(thing)
+    elif thing[0] == '#':
+        # The symbols #t and #f are represented by Python's True and False, respectively.
+        #   "#t" parses to True
+        if thing[1] == 't':
+            result = True
+        elif thing[1] == 'f':
+            result = False
+    elif thing[0] == "'":
+        # some shorthand for the quote form idk
+        result = typer('(quote ' + thing[1:] + ')')
+    else:
+        try:
+            # Integers are represented as Python integers.
+            #   "42" parses to 42
+            result = int(thing)
+        except ValueError:
+            # Symbols are represented as strings.
+            #   "foo" parses to "foo"
+            if thing[0] == ')':
+                raise LispError()
+            else:
+                result = thing
+    return result
+
+def parse_level(source):
+    assert source[0] == '('
+    ending = find_matching_paren(source)
+    expressions = split_exps(source[1:ending])
+    return map(typer, expressions)
 
 def parse(source):
     """Parse string representation of one *single* expression
     into the corresponding Abstract Syntax Tree."""
 
-    raise NotImplementedError("DIY")
+    source = remove_comments(source).strip()
+    start = 0
+
+    if source[start] == '(':
+        ending = find_matching_paren(source, start)
+        if ending < (len(source) - 1):
+            raise LispError('Expected EOF')
+
+        result = parse_level(source)
+    else:
+        result = typer(source)
+
+    return result
 
 ##
-## Below are a few useful utility functions. These should come in handy when 
-## implementing `parse`. We don't want to spend the day implementing parenthesis 
+## Below are a few useful utility functions. These should come in handy when
+## implementing `parse`. We don't want to spend the day implementing parenthesis
 ## counting, after all.
-## 
+##
 
 def remove_comments(source):
     """Remove from a string anything in between a ; and a linebreak"""
     return re.sub(r";.*\n", "\n", source)
 
 def find_matching_paren(source, start=0):
-    """Given a string and the index of an opening parenthesis, determines 
+    """Given a string and the index of an opening parenthesis, determines
     the index of the matching closing paren."""
 
     assert source[start] == '('
@@ -44,10 +89,10 @@ def find_matching_paren(source, start=0):
     return pos
 
 def split_exps(source):
-    """Splits a source string into subexpressions 
+    """Splits a source string into subexpressions
     that can be parsed individually.
 
-    Example: 
+    Example:
 
         > split_exps("foo bar (baz 123)")
         ["foo", "bar", "(baz 123)"]
@@ -61,10 +106,10 @@ def split_exps(source):
     return exps
 
 def first_expression(source):
-    """Split string into (exp, rest) where exp is the 
-    first expression in the string and rest is the 
+    """Split string into (exp, rest) where exp is the
+    first expression in the string and rest is the
     rest of the string after this expression."""
-    
+
     source = source.strip()
     if source[0] == "'":
         exp, rest = first_expression(source[1:])
