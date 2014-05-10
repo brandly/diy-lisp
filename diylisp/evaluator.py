@@ -59,8 +59,8 @@ def evaluate(ast, env):
             thing = evaluate(thing, env)
         return thing
 
-    @evalIfList
     def ensureInt(thing):
+        thing = evalIfList(thing)
         if isinstance(thing, int):
             return thing
         else:
@@ -69,21 +69,23 @@ def evaluate(ast, env):
     """Evaluate an Abstract Syntax Tree in the specified environment."""
     if isinstance(ast, (bool, int)):
         result = ast
+
     elif ast[0] == 'quote':
         result = ast[1]
+
     elif ast[0] == 'atom':
-        if isinstance(ast[1], list):
-            potentialAtom = evaluate(ast[1], env)
-            result = not isinstance(potentialAtom, list)
-        else:
-            result = isinstance(ast[1], (bool, int))
+        ast[1] = evalIfList(ast[1])
+        result = not isinstance(ast[1], list)
 
     elif ast[0] == 'eq':
-        if isinstance(ast[1], list):
-            result = (ast[1] == ast[2]) and not listInList(ast[1])
+        ast[1] = evalIfList(ast[1])
+        ast[2] = evalIfList(ast[2])
+
+        # Lists are never equal, because lists are not atoms
+        if isinstance(ast[1], list) or isinstance(ast[2], list):
+            result = False
         else:
             result = (ast[1] == ast[2])
-        # result = (evalIfList(ast[1]) == evalIfList(ast[2]))
 
     elif ast[0] in theMaths:
         math = theMaths[ast[0]]
