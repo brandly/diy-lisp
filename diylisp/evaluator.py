@@ -99,7 +99,17 @@ def evaluate(ast, env):
         else:
             result = evalIfList(ast[3])
 
+    elif ast[0] == 'define':
+        if len(ast) != 3:
+            raise LispError("Wrong number of arguments")
+
+        if not isinstance(ast[1], str):
+            raise LispError("non-symbol")
+
+        env.set(ast[1], evalIfList(ast[2]))
+        result = None
+
     else:
-        result = ast
+        result = env.lookup(ast)
 
     return result
