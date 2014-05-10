@@ -91,6 +91,14 @@ def evaluate(ast, env):
         math = theMaths[ast[0]]
         result = math(ensureInt(ast[1]), ensureInt(ast[2]))
 
+    elif ast[0] == 'if':
+        ast[1] = evalIfList(ast[1])
+
+        if ast[1]:
+            result = evalIfList(ast[2])
+        else:
+            result = evalIfList(ast[3])
+
     else:
         result = ast
 
