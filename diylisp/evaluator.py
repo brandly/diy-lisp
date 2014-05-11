@@ -70,9 +70,12 @@ def evaluate(ast, env):
     if isinstance(ast, (bool, int)):
         result = ast
 
+    # quotes don't need evaluating
     elif ast[0] == 'quote':
         result = ast[1]
 
+    # checks if item is an atom
+    # lists are not atoms
     elif ast[0] == 'atom':
         ast[1] = evalIfNeeded(ast[1])
         result = not isinstance(ast[1], list)
@@ -87,6 +90,7 @@ def evaluate(ast, env):
         else:
             result = (ast[1] == ast[2])
 
+    # ensure we have a hashable object to lookup on theMaths
     elif isinstance(ast[0], str) and ast[0] in theMaths:
         math = theMaths[ast[0]]
         result = math(ensureInt(ast[1]), ensureInt(ast[2]))
