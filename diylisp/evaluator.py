@@ -14,14 +14,6 @@ making your work a bit easier. (We're supposed to get through this thing
 in a day, after all.)
 """
 
-def listInList(lst):
-    result = False
-    for item in lst:
-        if isinstance(item, list):
-            result = True
-            break
-    return result
-
 def add(a, b):
     return a + b
 
