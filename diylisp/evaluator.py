@@ -53,7 +53,6 @@ theMaths = {
 }
 
 def evaluate(ast, env):
-    print ast
 
     def evalIfNeeded(thing, e=env):
         if isinstance(thing, (list, str)):
@@ -88,7 +87,7 @@ def evaluate(ast, env):
         else:
             result = (ast[1] == ast[2])
 
-    elif ast[0] in theMaths:
+    elif isinstance(ast[0], str) and ast[0] in theMaths:
         math = theMaths[ast[0]]
         result = math(ensureInt(ast[1]), ensureInt(ast[2]))
 
@@ -131,9 +130,15 @@ def evaluate(ast, env):
         result = evaluate(ast[0].body, env.extend(argsMap))
 
     elif isinstance(ast, list):
-        # ast[0] is assumed to be a function name
-        ast[0] = env.lookup(ast[0])
+        if isinstance(ast[0], list):
+            # calling lambda directly
+            ast[0] = evaluate(ast[0], env)
+        else:
+            # ast[0] is assumed to be a function name
+            ast[0] = env.lookup(ast[0])
+
         result = evaluate(ast, ast[0].env)
+
     else:
         result = env.lookup(ast)
 
