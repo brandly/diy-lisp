@@ -123,6 +123,9 @@ def evaluate(ast, env):
         env = ast[0].env
         args = ast[1:]
 
+        if len(params) != len(args):
+            raise LispError("wrong number of arguments, expected " + `len(params)` + " got " + `len(args)`)
+
         argsMap = {}
         for i, param in enumerate(params):
             argsMap[param] = evalIfNeeded(args[i], env)
@@ -134,8 +137,11 @@ def evaluate(ast, env):
             # calling lambda directly
             ast[0] = evaluate(ast[0], env)
         else:
-            # ast[0] is assumed to be a function name
-            ast[0] = env.lookup(ast[0])
+            try:
+                # ast[0] is assumed to be a function name
+                ast[0] = env.lookup(ast[0])
+            except LispError:
+                raise LispError("not a function")
 
         result = evaluate(ast, ast[0].env)
 
