@@ -43,14 +43,14 @@ def evaluate(ast, env):
         result = not isinstance(ast[1], list)
 
     elif ast[0] == 'eq':
-        ast[1] = evalIfNeeded(ast[1])
-        ast[2] = evalIfNeeded(ast[2])
+        left = evalIfNeeded(ast[1])
+        right = evalIfNeeded(ast[2])
 
         # Lists are never equal, because lists are not atoms
-        if isinstance(ast[1], list) or isinstance(ast[2], list):
+        if isinstance(left, list) or isinstance(right, list):
             result = False
         else:
-            result = (ast[1] == ast[2])
+            result = (left == right)
 
     # ensure we have a hashable object to lookup on theMaths
     elif isinstance(ast[0], str) and ast[0] in theMaths:
@@ -58,9 +58,9 @@ def evaluate(ast, env):
         result = math(ensureInt(ast[1]), ensureInt(ast[2]))
 
     elif ast[0] == 'if':
-        ast[1] = evalIfNeeded(ast[1])
+        comparison = evalIfNeeded(ast[1])
 
-        if ast[1]:
+        if comparison:
             result = evalIfNeeded(ast[2])
         else:
             result = evalIfNeeded(ast[3])
@@ -94,27 +94,26 @@ def evaluate(ast, env):
 
     # extract first element from list
     elif ast[0] == 'head':
-        ast[1] = evalIfNeeded(ast[1])
+        theList = evalIfNeeded(ast[1])
 
-        if len(ast[1]) < 1:
+        if len(theList) < 1:
             raise LispError("cannot call `head` on empty list")
 
-        result = ast[1].pop(0)
+        result = theList.pop(0)
 
     # the list after removing first element
     elif ast[0] == 'tail':
-        ast[1] = evalIfNeeded(ast[1])
+        theList = evalIfNeeded(ast[1])
 
-        if len(ast[1]) < 1:
+        if len(theList) < 1:
             raise LispError("cannot call `pop` on empty list")
 
-        ast[1].pop(0)
-        result = ast[1]
+        theList.pop(0)
+        result = theList
 
     elif ast[0] == 'empty':
-        ast[1] = evalIfNeeded(ast[1])
-
-        result = len(ast[1]) < 1
+        theList = evalIfNeeded(ast[1])
+        result = len(theList) < 1
 
     elif isinstance(ast[0], Closure):
         params = ast[0].params
@@ -133,15 +132,17 @@ def evaluate(ast, env):
     elif isinstance(ast, list):
         if isinstance(ast[0], list):
             # calling lambda directly
-            ast[0] = evaluate(ast[0], env)
+            closure = evaluate(ast[0], env)
         else:
             try:
                 # ast[0] is assumed to be a function name
-                ast[0] = env.lookup(ast[0])
+                closure = env.lookup(ast[0])
             except LispError:
                 raise LispError("not a function")
 
-        result = evaluate(ast, ast[0].env)
+        withClosure = ast[1:]
+        withClosure.insert(0, closure)
+        result = evaluate(withClosure, closure.env)
 
     else:
         result = env.lookup(ast)

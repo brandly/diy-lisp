@@ -17,21 +17,21 @@ of one stdlib function.
 
 Put the implementation in the file `stdlib.diy` at the root directory
 of the repository. The first function, `not` is already defined for you.
-It's your job to create the rest, or perhaps somthing completely different?
+It's your job to create the rest, or perhaps something completely different?
 
 Anything you put in `stdlib.diy` is also available from the REPL, so feel
 free to test things out there.
 
-    $ ./repl 
+    $ ./repl
     →  (not #t)
     #f
 
-PS: Note that in these tests, `interpret` is used. In addition to parsing 
-and evaluating, it "unparses" the result, hence strings such as "#t" as the 
+PS: Note that in these tests, `interpret` is used. In addition to parsing
+and evaluating, it "unparses" the result, hence strings such as "#t" as the
 expected result instead of `True`.
 """
 
-def test_not():    
+def test_not():
     assert_equals("#t", interpret('(not #f)', env))
     assert_equals("#f", interpret('(not #t)', env))
 
@@ -108,6 +108,6 @@ def test_range():
     assert_equals("()", interpret("(range 2 1)", env))
 
 def test_sort():
-    assert_equals("(1 2 3 4 5 6 7)", 
+    assert_equals("(1 2 3 4 5 6 7)",
         interpret("(sort '(6 3 7 2 4 1 5))", env))
     assert_equals("()", interpret("'()", env))
