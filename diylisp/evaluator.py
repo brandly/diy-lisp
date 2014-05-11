@@ -14,36 +14,6 @@ making your work a bit easier. (We're supposed to get through this thing
 in a day, after all.)
 """
 
-def add(a, b):
-    return a + b
-
-def subtract(a, b):
-    return a - b
-
-def divide(a, b):
-    return a / b
-
-def multiply(a, b):
-    return a * b
-
-def divide(a, b):
-    return a / b
-
-def mod(a, b):
-    return a % b
-
-def gt(a, b):
-    return a > b
-
-theMaths = {
-    '+': add,
-    '-': subtract,
-    '/': divide,
-    '*': multiply,
-    'mod': mod,
-    '>': gt
-}
-
 def evaluate(ast, env):
 
     def evalIfNeeded(thing, e=env):
@@ -145,3 +115,33 @@ def evaluate(ast, env):
         result = env.lookup(ast)
 
     return result
+
+def add(a, b):
+    return a + b
+
+def subtract(a, b):
+    return a - b
+
+def divide(a, b):
+    return a / b
+
+def multiply(a, b):
+    return a * b
+
+def divide(a, b):
+    return a / b
+
+def mod(a, b):
+    return a % b
+
+def gt(a, b):
+    return a > b
+
+theMaths = {
+    '+': add,
+    '-': subtract,
+    '/': divide,
+    '*': multiply,
+    'mod': mod,
+    '>': gt
+}
