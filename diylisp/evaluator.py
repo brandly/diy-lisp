@@ -84,6 +84,38 @@ def evaluate(ast, env):
 
         result = Closure(env, ast[1], ast[2])
 
+    # prepend to list
+    elif ast[0] == 'cons':
+        ast[1] = evalIfNeeded(ast[1])
+        ast[2] = evalIfNeeded(ast[2])
+
+        ast[2].insert(0, ast[1])
+        result = ast[2]
+
+    # extract first element from list
+    elif ast[0] == 'head':
+        ast[1] = evalIfNeeded(ast[1])
+
+        if len(ast[1]) < 1:
+            raise LispError("cannot call `head` on empty list")
+
+        result = ast[1].pop(0)
+
+    # the list after removing first element
+    elif ast[0] == 'tail':
+        ast[1] = evalIfNeeded(ast[1])
+
+        if len(ast[1]) < 1:
+            raise LispError("cannot call `pop` on empty list")
+
+        ast[1].pop(0)
+        result = ast[1]
+
+    elif ast[0] == 'empty':
+        ast[1] = evalIfNeeded(ast[1])
+
+        result = len(ast[1]) < 1
+
     elif isinstance(ast[0], Closure):
         params = ast[0].params
         env = ast[0].env
